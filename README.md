@@ -43,9 +43,9 @@ docker build -t elastalert .
 
 ### Options
 
-Using a custom ElastAlert version (a [release from github](https://github.com/Yelp/elastalert/releases)) e.g. `master` or `v0.1.28`
+Using a custom ElastAlert version (a [release from github](https://github.com/Yelp/elastalert/releases)) e.g. `master` or `v0.2.1a1`
 ```bash
-make build v=v0.1.28
+make build v=v0.2.1a1
 ```
 Using a custom mirror
 ```bash
@@ -70,7 +70,7 @@ You can use the following config options:
   "debug": false, // Will run ElastAlert in debug mode. This will increase the logging verboseness, change all alerts to DebugAlerter, which prints alerts and suppresses their normal action, and skips writing search and alert metadata back to Elasticsearch.
   "rulesPath": { // The path to the rules folder containing all the rules. If the folder is empty a dummy file will be created to allow ElastAlert to start.
     "relative": true, // Whether to use a path relative to the `elastalertPath` folder.
-    "path": "/rules" // The path to the rules folder. 
+    "path": "/rules" // The path to the rules folder.
   },
   "templatesPath": { // The path to the rules folder containing all the rule templates. If the folder is empty a dummy file will be created to allow ElastAlert to start.
     "relative": true, // Whether to use a path relative to the `elastalertPath` folder.
@@ -116,45 +116,45 @@ buffer_time:
 ```
 
 There is also a `elastalert-test.yaml` file which is only used when you use the API to test a rule. This allows you to write to a different `writeback_index` for example when testing rules.
- 
+
 ## API
 This server exposes the following REST API's:
 
 - **GET `/`**
 
     Exposes the current version running
-  
+
 - **GET `/status`**
 
-    Returns either 'SETUP', 'READY', 'ERROR', 'STARTING', 'CLOSING', 'FIRST_RUN' or 'IDLE' depending on the current ElastAlert process status. 
-  
+    Returns either 'SETUP', 'READY', 'ERROR', 'STARTING', 'CLOSING', 'FIRST_RUN' or 'IDLE' depending on the current ElastAlert process status.
+
 - **GET `/status/control/:action`**
 
     Where `:action` can be either 'start' or 'stop', which will respectively start or stop the current ElastAlert process.
-  
+
 - **[WIP] GET `/status/errors`**
 
     When `/status` returns 'ERROR' this returns a list of errors that were triggered.
-  
+
 - **GET `/rules`**
 
     Returns a list of directories and rules that exist in the `rulesPath` (from the config) and are being run by the ElastAlert process.
-  
+
 - **GET `/rules/:id`**
 
     Where `:id` is the id of the rule returned by **GET `/rules`**, which will return the file contents of that rule.
-  
+
 - **POST `/rules/:id`**
 
     Where `:id` is the id of the rule returned by **GET `/rules`**, which will allow you to edit the rule. The body send should be:
-  
+
       ```javascript
       {
         // Required - The full yaml rule config.
         "yaml": "..."
       }
       ```
-    
+
 - **DELETE `/rules/:id`**
 
     Where `:id` is the id of the rule returned by **GET `/rules`**, which will delete the given rule.
@@ -162,45 +162,45 @@ This server exposes the following REST API's:
 - **GET `/templates`**
 
     Returns a list of directories and templates that exist in the `templatesPath` (from the config) and are being run by the ElastAlert process.
-  
+
 - **GET `/templates/:id`**
 
     Where `:id` is the id of the template returned by **GET `/templates`**, which will return the file contents of that template.
-  
+
 - **POST `/templates/:id`**
 
     Where `:id` is the id of the template returned by **GET `/templates`**, which will allow you to edit the template. The body send should be:
-  
+
       ```javascript
       {
         // Required - The full yaml template config.
         "yaml": "..."
       }
       ```
-    
+
 - **DELETE `/templates/:id`**
 
     Where `:id` is the id of the template returned by **GET `/templates`**, which will delete the given template.
-  
+
 - **POST `/test`**
 
     This allows you to test a rule. The body send should be:
-  
+
       ```javascript
       {
         // Required - The full yaml rule config.
         "rule": "...",
-        
+
         // Optional - The options to use for testing the rule.
         "options": {
-        
-          // Can be either "all", "schemaOnly" or "countOnly". "all" will give the full console output. 
+
+          // Can be either "all", "schemaOnly" or "countOnly". "all" will give the full console output.
           // "schemaOnly" will only validate the yaml config. "countOnly" will only find the number of matching documents and list available fields.
           "testType": "all",
-          
+
           // Can be any number larger than 0 and this tells ElastAlert over a period of how many days the test should be run
           "days": "1"
-          
+
           // Whether to send real alerts
           "alert": false,
 
@@ -211,10 +211,10 @@ This server exposes the following REST API's:
           "maxResults": 1000
         }
       }
-      ``` 
+      ```
 
 - **WEBSOCKET `/test`**
-    
+
     This allows you to test a rule and receive progress over a websocket. Send a message as JSON object (stringified) with two keys: `rule` (yaml string) and `options` (JSON object). You will receive progress messages over the socket as the test runs.
 
 - **GET `/metadata/:type`**
@@ -223,39 +223,39 @@ This server exposes the following REST API's:
 
 - **GET `/mapping/:index`**
 
-    Returns field mapping from elasticsearch for a given index. 
+    Returns field mapping from elasticsearch for a given index.
 
 - **GET `/search/:index`**
 
-    Performs elasticsearch query on behalf of the API. JSON body to this endpoint will become body of an ES search. 
+    Performs elasticsearch query on behalf of the API. JSON body to this endpoint will become body of an ES search.
 
 - **[WIP] GET `/config`**
 
     Gets the ElastAlert configuration from `config.yaml` in `elastalertPath` (from the config).
-  
+
 - **[WIP] POST `/config`**
 
     Allows you to edit the ElastAlert configuration from `config.yaml` in `elastalertPath` (from the config). The required body to be send will be edited when the work on this API is done.
 
 - **[WIP] POST `/download`**
-  
+
     Allows you to download a .tar archive with rules from a given HTTP endpoint. The archive will be downloaded, extracted and removed.
-    Please note, body should contain URL pointing to tar archive, with tar extension.	
-   
+    Please note, body should contain URL pointing to tar archive, with tar extension.
+
     Usage example:
-	
+
     ```bash
     curl -X POST localhost:3030/download -d "url=https://artifactory.com:443/artifactory/raw/rules/rules.tar"
     ```
-        
+
 ## Contributing
 Want to contribute to this project? Great! Please read our [contributing guidelines](CONTRIBUTING.md) before submitting an issue or a pull request.
 
 **We only accept pull requests on our [GitHub repository](https://github.com/bitsensor/elastalert)!**
- 
+
 ## Contact
 We'd love to help you if you have any questions. You can contact us by sending an e-mail to [dev@bitsensor.io](mailto:dev@bitsensor.io) or by using the [contact info on our website]().
- 
+
 ## License
 This project is [BSD Licensed](../LICENSE.md) with some modifications. Note that this only accounts for the ElastAlert Server, not ElastAlert itself ([ElastAlert License](https://github.com/Yelp/elastalert#license)).
 

@@ -1,8 +1,8 @@
 FROM alpine:latest as py-ea
-ARG ELASTALERT_VERSION=v0.2.0b2
+ARG ELASTALERT_VERSION=v0.2.1a1
 ENV ELASTALERT_VERSION=${ELASTALERT_VERSION}
 # URL from which to download Elastalert.
-ARG ELASTALERT_URL=https://github.com/Yelp/elastalert/archive/$ELASTALERT_VERSION.zip
+ARG ELASTALERT_URL=https://github.com/ebslteam/elastalert/archive/$ELASTALERT_VERSION.zip
 ENV ELASTALERT_URL=${ELASTALERT_URL}
 # Elastalert home directory full path.
 ENV ELASTALERT_HOME /opt/elastalert
@@ -19,7 +19,7 @@ RUN apk add --update --no-cache ca-certificates openssl-dev openssl python2-dev 
 WORKDIR "${ELASTALERT_HOME}"
 
 # Install Elastalert.
-# see: https://github.com/Yelp/elastalert/issues/1654
+# see: https://github.com/ebslteam/elastalert/issues/1654
 RUN sed -i 's/jira>=1.0.10/jira>=1.0.10,<1.0.15/g' setup.py && \
     python setup.py install && \
     pip install -r requirements.txt
